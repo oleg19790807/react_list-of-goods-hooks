@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable prettier/prettier */
 /* eslint-disable padding-line-between-statements */
 import React, { useState } from 'react';
@@ -17,36 +18,47 @@ export const goodsFromServer: string[] = [
   'Garlic',
 ];
 
-type SortOrder = 'alphabetical' | 'length' | '';
+// Enum for SortType
+enum SortType {
+  NONE = 'none',
+  ALPHABETICAL = 'alphabetical',
+  LENGTH = 'length',
+}
 
 export const App: React.FC = () => {
   const [goods, setGoods] = useState<string[]>(goodsFromServer);
-  const [sortOrder, setSortOrder] = useState<SortOrder>('');
+  const [sortType, setSortType] = useState<SortType>(SortType.NONE);
   const [isReversed, setIsReversed] = useState<boolean>(false);
 
+  // Helper function to apply reverse if needed
+  const applyReverseIfNeeded = (sortedGoods: string[]): string[] => {
+    return isReversed ? sortedGoods.reverse() : sortedGoods;
+  };
+
+  // Sort alphabetically
   const sortAlphabetically = (): void => {
-    const sortedGoods = [...goods].sort((a, b) => a.localeCompare(b));
-    setGoods(sortedGoods);
-    setSortOrder('alphabetical');
-    setIsReversed(false);
+    const sortedGoods = [...goodsFromServer].sort((a, b) => a.localeCompare(b));
+    setGoods(applyReverseIfNeeded(sortedGoods));
+    setSortType(SortType.ALPHABETICAL);
   };
 
+  // Sort by length
   const sortByLength = (): void => {
-    const sortedGoods = [...goods].sort((a, b) => a.length - b.length);
-    setGoods(sortedGoods);
-    setSortOrder('length');
-    setIsReversed(false);
+    const sortedGoods = [...goodsFromServer].sort((a, b) => a.length - b.length);
+    setGoods(applyReverseIfNeeded(sortedGoods));
+    setSortType(SortType.LENGTH);
   };
 
+  // Reverse the order
   const reverseOrder = (): void => {
-    const reversedGoods = [...goods].reverse();
-    setGoods(reversedGoods);
+    setGoods([...goods].reverse());
     setIsReversed(!isReversed);
   };
 
+  // Reset to original order
   const resetOrder = (): void => {
     setGoods(goodsFromServer);
-    setSortOrder('');
+    setSortType(SortType.NONE);
     setIsReversed(false);
   };
 
@@ -55,7 +67,7 @@ export const App: React.FC = () => {
       <div className="buttons">
         <button
           type="button"
-          className={`button is-info ${sortOrder === 'alphabetical' ? '' : 'is-light'}`}
+          className={`button is-info ${sortType === SortType.ALPHABETICAL ? '' : 'is-light'}`}
           onClick={sortAlphabetically}
         >
           Sort alphabetically
@@ -63,7 +75,7 @@ export const App: React.FC = () => {
 
         <button
           type="button"
-          className={`button is-success ${sortOrder === 'length' ? '' : 'is-light'}`}
+          className={`button is-success ${sortType === SortType.LENGTH ? '' : 'is-light'}`}
           onClick={sortByLength}
         >
           Sort by length
@@ -77,7 +89,7 @@ export const App: React.FC = () => {
           Reverse
         </button>
 
-        {(sortOrder || isReversed) && (
+        {(sortType !== SortType.NONE || isReversed) && (
           <button
             type="button"
             className="button is-danger"
